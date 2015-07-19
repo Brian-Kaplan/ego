@@ -1,0 +1,29 @@
+<!-- Author: Brian Kaplan -->
+
+<h1>Listing Reddit Accounts</h1>
+ <%= link_to 'Home', root_path %>
+ <%= link_to 'New Account', new_account_path %>
+ <%= link_to 'Update All',  :controller => 'accounts', :action => 'updateALL' %>  
+ <br></br>
+ 
+<table>
+  <tr>
+    <th>Reddit Username</th>
+    <th>Link Karma</th>
+    <th colspan="2"></th>
+  </tr>
+ 
+  <% @accounts.each do |account| %>
+    <tr>
+      <td><%= account.rname %></td>
+      <td><%= account.link_karma %></td>
+      <td><%= link_to 'Show', account_path(account) %></td>
+      <td><%= link_to 'Edit', edit_account_path(account) %></td>
+      <td><%= link_to 'Update',  account_path(account),
+              method: :patch                    %></td>
+      <td><%= link_to 'Destroy', account_path(account),
+              method: :delete,
+              data: { confirm: 'Are you sure?' } %></td>
+    </tr>
+  <% end %>
+</table>

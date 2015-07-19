@@ -1,0 +1,71 @@
+# Author: Brian Kaplan
+
+class AccountsController < ApplicationController
+
+	def index
+		@accounts = Account.order(link_karma: :desc)
+	end
+
+	def show
+		@account = Account.find(params[:id])
+	end
+	
+	def new
+		@account = Account.new
+	end
+
+	def edit
+	  	@account = Account.find(params[:id])
+	end
+
+	def create
+		@account = Account.new(account_params)
+ 		@account = getLinkKarma(@account)
+  		if @account.save
+  			redirect_to @account
+  		else
+  			render 'new'
+  		end
+	end
+
+	def update
+		@account = Account.find(params[:id])
+		@account = getLinkKarma(@account)
+		if @account.update(:link_karma => @account.link_karma)
+			redirect_to @account
+		else
+			render 'edit'
+		end
+	end
+
+	def destroy
+		@account = Account.find(params[:id])
+		@account.destroy
+
+		redirect_to accounts_path
+	end
+
+	def updateALL
+		@accounts = Account.order(link_karma: :desc)
+		for i in 1..@accounts.length
+			@account = Account.find(i)
+			@account = getLinkKarma(@account)
+			@account.update(:link_karma => @account.link_karma)
+		end
+		render 'index'
+	end
+
+	private
+		def account_params
+			params.require(:account).permit(:rname, :link_karma)
+		end
+
+	private 
+	def getLinkKarma(account)
+		user = RedditKit.user account.rname
+		if user != nil
+			account.link_karma = user.link_karma
+		end
+		return account
+	end
+end
