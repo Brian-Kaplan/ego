@@ -4,7 +4,7 @@ Rails.application.routes.draw do
   get 'welcome/index'
   get 'accounts/new' => 'accounts#new' 
   get 'accounts/updateALL' => 'accounts#updateALL'
-
+  get 'accounts/scrapeFrontPage' => 'accounts#scrapeFrontPage'
   resources :accounts
 
   # The priority is based upon order of creation: first created -> highest priority.
