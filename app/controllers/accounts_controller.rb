@@ -4,6 +4,7 @@ class AccountsController < ApplicationController
 
 	def index
 		@accounts = Account.order(link_karma: :desc)
+		@count = 0
 	end
 
 	def show
@@ -32,7 +33,9 @@ class AccountsController < ApplicationController
 		@account = Account.find(params[:id])
 		@account = getLinkKarma(@account)
 		if @account.update(:link_karma => @account.link_karma)
-			redirect_to @account
+			@accounts = Account.order(link_karma: :desc)
+			@count = 0
+			render 'index'
 		else
 			render 'edit'
 		end
@@ -47,11 +50,29 @@ class AccountsController < ApplicationController
 
 	def updateALL
 		@accounts = Account.order(link_karma: :desc)
+		@count = 0
 		for i in 1..@accounts.length
 			@account = Account.find(i)
 			@account = getLinkKarma(@account)
 			@account.update(:link_karma => @account.link_karma)
 		end
+		render 'index'
+	end
+
+	def scrapeFrontPage
+		@count = 0
+		getJson
+		i = 0
+		while i < @authorArray.length
+			@account = Account.new
+			@account.rname = @authorArray.at(i)
+			@account = getLinkKarma(@account)
+			if not Account.exists?(rname: @account.rname)
+				@account.save
+			end
+			i+=1
+		end
+		@accounts = Account.order(link_karma: :desc)
 		render 'index'
 	end
 
@@ -67,5 +88,19 @@ class AccountsController < ApplicationController
 			account.link_karma = user.link_karma
 		end
 		return account
+	end
+
+	private
+	def getJson
+		@response = HTTParty.get("https://www.reddit.com/r/all/.json")
+		@result = @response.body
+		http_party_json = JSON.parse(@response.body)
+		count = 0
+		@authorArray = Array.new
+		while count < 25 
+			author = http_party_json['data']['children'][count]['data']['author']
+			@authorArray << author
+			count+=1
+		end
 	end
 end
